@@ -1,0 +1,24 @@
+{
+ "comptes": {
+  "fr": {
+   "profil": "GTA6",
+   "langue": "fr",
+   "plateformes": ["tiktok", "instagram"],
+   "hashtags": ["#gta6", "#gtavi", "#gta", "#streamerfr", "#twitchfr", "#pourtoi", "#fyp"],
+   "twitch": ["squeezie", "gotaga", "michou", "inoxtag", "amixem", "kamet0", "zerator", "locklear",
+              "aminematue", "antoinedaniel", "domingo", "ponce", "mistermv", "jltomy", "medja", "sardoche",
+              "etoiles", "joyca", "tiboinshape", "lebouseuh", "gom4rt", "maghla", "baghera", "rivenzi", "doigby"],
+   "kick": ["bichouu", "jolavanille", "olivanie"]
+  },
+  "us": {
+   "profil": "default",
+   "langue": "en",
+   "plateformes": ["tiktok", "instagram"],
+   "hashtags": ["#gta6", "#gtavi", "#gta", "#streamer", "#twitch", "#fyp", "#viral"],
+   "twitch": ["kaicenat", "xqc", "hasanabi", "summit1g", "shroud", "moistcr1tikal", "lirik", "tarik",
+              "jynxzi", "caseoh_", "zackrawrr", "ninja", "buddha", "ramee", "lord_kebun", "fanum", "agent00",
+              "dukedennis", "plaqueboymax", "sykkuno", "vanillamace", "stableronaldo", "sketch", "quackity", "penta"],
+   "kick": ["xqc", "adinross", "n3on", "trainwreckstv"]
+  }
+ }
+}

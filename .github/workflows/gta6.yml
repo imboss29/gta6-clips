@@ -1,0 +1,56 @@
+name: Clips GTA 6 (1 par heure, FR + US)
+
+on:
+  schedule:
+    - cron: "7 * * * *"          # toutes les heures (GitHub peut décaler de quelques minutes)
+  workflow_dispatch:
+    inputs:
+      essai:
+        description: "Essai : monte le clip sans le publier"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gta6-${{ github.run_id }}
+  cancel-in-progress: false
+
+jobs:
+  clip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        compte: [fr, us]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: whisper-small-v1
+      - name: Outils
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          pip install -q -r requirements.txt
+      - name: Choisir, monter et publier le clip
+        env:
+          UPLOAD_POST_KEY: ${{ secrets.UPLOAD_POST_KEY }}
+        run: python src/gta6.py ${{ matrix.compte }} ${{ inputs.essai == true && '--essai' || '' }}
+      - uses: actions/upload-artifact@v4
+        if: ${{ inputs.essai == true }}
+        with:
+          name: essai-${{ matrix.compte }}
+          path: essai/
+      - name: Mémoriser les clips déjà faits
+        if: ${{ inputs.essai != true }}
+        run: |
+          git config user.name "clips-bot" && git config user.email "bot@users.noreply.github.com"
+          git add etat-${{ matrix.compte }}.json && git commit -qm "Clip ${{ matrix.compte }} $(date -u +%FT%H:%M)" || exit 0
+          for i in 1 2 3 4 5; do git pull -q --rebase && git push -q && exit 0; sleep $((RANDOM % 10 + 3)); done
