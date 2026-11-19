@@ -240,6 +240,11 @@ def main():
     essai = "--essai" in sys.argv
     key = os.environ.get("UPLOAD_POST_KEY", "")
     e = charger_etat(compte)
+    if not essai and e["posts"]:
+        dernier = dt.datetime.fromisoformat(e["posts"][-1]["quand"])
+        if dt.datetime.utcnow() - dernier < dt.timedelta(minutes=50):
+            log(f"{compte} : dernier post du robot il y a moins de 50 min, on attend")
+            return
     if not essai and not creneau_libre(compte, key):
         log(f"{compte} : un post est déjà prévu ou sorti il y a moins de 35 min, on passe cette heure")
         return

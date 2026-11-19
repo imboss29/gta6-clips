@@ -2,7 +2,7 @@ name: Clips GTA 6 (1 par heure, FR + US)
 
 on:
   schedule:
-    - cron: "7 * * * *"          # toutes les heures (GitHub peut décaler de quelques minutes)
+    - cron: "*/10 * * * *"       # toutes les 10 min (GitHub saute souvent des passages) ; le script ne poste qu'une fois par heure
   workflow_dispatch:
     inputs:
       essai:
@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: gta6-${{ github.run_id }}
+  group: gta6
   cancel-in-progress: false
 
 jobs:
