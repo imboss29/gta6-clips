@@ -2,7 +2,7 @@ name: Clips GTA 6 (1 par heure, FR + US)
 
 on:
   schedule:
-    - cron: "*/10 * * * *"       # toutes les 10 min (GitHub saute souvent des passages) ; le script ne poste qu'une fois par heure
+    - cron: "*/10 * * * *"       # GitHub saute souvent ces passages : le Mac déclenche aussi le robot toutes les 15 min
   workflow_dispatch:
     inputs:
       essai:
@@ -27,19 +27,38 @@ jobs:
         compte: [fr, us]
     steps:
       - uses: actions/checkout@v4
+      - name: Garde (1 post par heure)
+        id: garde
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, datetime as dt, pathlib
+          p = pathlib.Path("etat-${{ matrix.compte }}.json")
+          posts = json.loads(p.read_text()).get("posts", []) if p.exists() else []
+          ok = "${{ inputs.essai }}" == "true" or not posts or \
+               dt.datetime.utcnow() - dt.datetime.fromisoformat(posts[-1]["quand"]) >= dt.timedelta(minutes=50)
+          print("go=" + ("true" if ok else "false"))
+          PY
+          cat "$GITHUB_OUTPUT"
       - uses: actions/setup-python@v5
+        if: steps.garde.outputs.go == 'true'
         with:
           python-version: "3.12"
           cache: pip
       - uses: actions/cache@v4
+        if: steps.garde.outputs.go == 'true'
         with:
           path: ~/.cache/huggingface
           key: whisper-small-v1
       - name: Outils
+        if: steps.garde.outputs.go == 'true'
         run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg
+          if ! (sudo apt-get update -qq && sudo apt-get install -y -qq -o Acquire::Retries=5 ffmpeg); then
+            curl -sSL --retry 5 https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz | tar xJ
+            sudo cp ffmpeg-*-static/ffmpeg ffmpeg-*-static/ffprobe /usr/local/bin/
+          fi
           pip install -q -r requirements.txt
       - name: Choisir, monter et publier le clip
+        if: steps.garde.outputs.go == 'true'
         env:
           UPLOAD_POST_KEY: ${{ secrets.UPLOAD_POST_KEY }}
         run: python src/gta6.py ${{ matrix.compte }} ${{ inputs.essai == true && '--essai' || '' }}
@@ -49,7 +68,7 @@ jobs:
           name: essai-${{ matrix.compte }}
           path: essai/
       - name: Mémoriser les clips déjà faits
-        if: ${{ inputs.essai != true }}
+        if: ${{ inputs.essai != true && steps.garde.outputs.go == 'true' }}
         run: |
           git config user.name "clips-bot" && git config user.email "bot@users.noreply.github.com"
           git add etat-${{ matrix.compte }}.json && git commit -qm "Clip ${{ matrix.compte }} $(date -u +%FT%H:%M)" || exit 0
