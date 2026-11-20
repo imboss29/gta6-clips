@@ -217,17 +217,22 @@ def publier(compte, clip, video, hook, key):
         legende = f"{hook} 😱\n🎮 {nom} en live sur {lien}\nAbonne-toi pour les meilleurs moments GTA 6 🔥\n{tags}"
     else:
         legende = f"{hook} 😱\n🎮 {nom} live on {lien}\nFollow for the best GTA 6 moments 🔥\n{tags}"
-    for essai in range(3):
+    plateformes = list(cc["plateformes"])
+    for essai in range(4):
         try:
             with open(video, "rb") as f:
                 r = requests.post("https://api.upload-post.com/api/upload",
                                   headers={"Authorization": f"Apikey {key}",
-                                           "Idempotency-Key": f"gta6-{compte}-{clip['id']}"},
-                                  data={"user": cc["profil"], "platform[]": cc["plateformes"],
+                                           "Idempotency-Key": f"gta6-{compte}-{clip['id']}-{'-'.join(plateformes)}"},
+                                  data={"user": cc["profil"], "platform[]": plateformes,
                                         "title": legende, "privacy_level": "PUBLIC_TO_EVERYONE",
                                         "media_type": "REELS"},
                                   files={"video": f}, timeout=(30, 900))
-            log(f"  publication : {r.status_code} {r.text[:300]}")
+            log(f"  publication ({'+'.join(plateformes)}) : {r.status_code} {r.text[:300]}")
+            if r.status_code == 429 and "tiktok" in r.text.lower() and "tiktok" in plateformes and len(plateformes) > 1:
+                plateformes.remove("tiktok")      # limite TikTok (15/24 h) atteinte : on publie quand même ailleurs
+                log("  limite TikTok atteinte : on renvoie sans TikTok")
+                continue
             return r.status_code < 300
         except requests.exceptions.RequestException as e:
             log(f"  envoi {essai + 1} raté : {e.__class__.__name__}")

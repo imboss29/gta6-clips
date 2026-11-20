@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+  <key>Label</key><string>com.corentin.gta6robot</string>
+  <key>ProgramArguments</key><array><string>/opt/homebrew/bin/gh</string><string>workflow</string><string>run</string><string>gta6.yml</string><string>--repo</string><string>imboss29/gta6-clips</string></array>
+  <key>StartInterval</key><integer>900</integer>
+  <key>StandardOutPath</key><string>/Users/corentinleclerc/gta6-clips/robot-mac.log</string>
+  <key>StandardErrorPath</key><string>/Users/corentinleclerc/gta6-clips/robot-mac.log</string>
+  <key>ProcessType</key><string>Background</string>
+</dict></plist>
